@@ -1,27 +1,24 @@
-import { useState } from 'react'
-
+import { AuthProvider, useAuth } from './context/AuthContext'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 
-function App() {
-  const [page, setPage] = useState('home')
+function NavigationHandler() {
+  const { page } = useAuth()
 
   return (
     <>
-      {page === 'home' && (
-        <Home onLogin={() => setPage('login')} />
-      )}
-
-      {page === 'login' && (
-        <Login onLogin={() => setPage('dashboard')} />
-      )}
-
-      {page === 'dashboard' && (
-        <Dashboard onLogout={() => setPage('home')} />
-      )}
+      {page === 'home' && <Home />}
+      {page === 'login' && <Login />}
+      {page === 'dashboard' && <Dashboard />}
     </>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <AuthProvider>
+      <NavigationHandler />
+    </AuthProvider>
+  )
+}
