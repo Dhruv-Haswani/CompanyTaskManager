@@ -1,28 +1,39 @@
 import { createContext, useContext, useState } from 'react'
 
-const AuthContext = createContext()
+const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [page, setPage] = useState('home')
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('company_user')
+      return savedUser ? JSON.parse(savedUser) : null
+    } catch {
+      return null
+    }
+  })
 
   const login = (email) => {
-    setUser({ email, role: 'User' })
-    setPage('dashboard')
+    const userData = { email }
+    setUser(userData)
+    localStorage.setItem('company_user', JSON.stringify(userData))
   }
 
   const logout = () => {
     setUser(null)
-    setPage('home')
+    localStorage.removeItem('company_user')
   }
 
   return (
-    <AuthContext.Provider value={{ page, setPage, user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
-export function useAuth() {
-  return useContext(AuthContext)
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
 }
