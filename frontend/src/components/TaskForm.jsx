@@ -1,28 +1,25 @@
 import { useState } from 'react'
 
 export default function TaskForm({ onAddTask }) {
-  const [taskText, setTaskText] = useState('')
+  const [text, setText] = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!taskText.trim()) return
-    onAddTask(taskText)
-    setTaskText('')
+    if (!text.trim()) return
+    onAddTask(text.trim())
+    setText('')
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 flex gap-3">
+    <form onSubmit={handleSubmit} className="mb-6 flex flex-col gap-3 sm:flex-row">
       <input
         type="text"
         placeholder="Enter a new task..."
-        value={taskText}
-        onChange={(e) => setTaskText(e.target.value)}
-        className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
       />
-      <button
-        type="submit"
-        className="rounded-lg bg-blue-600 px-5 py-2 font-medium text-white hover:bg-blue-700 transition"
-      >
+      <button type="submit" className="btn-primary whitespace-nowrap">
         Add Task
       </button>
     </form>

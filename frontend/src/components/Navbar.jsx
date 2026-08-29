@@ -1,28 +1,16 @@
-import { useAuth } from '../context/AuthContext'
-
-export default function Navbar() {
-  // Access global context state directly via custom hook
-  const { user, logout } = useAuth()
-
+export default function Navbar({ userEmail, onLogout }) {
   return (
-    <header className="flex items-center justify-between bg-white px-6 py-4 shadow-sm border-b border-gray-100">
-      <h1 className="text-xl font-bold text-gray-800">
-        Company Task Manager
-      </h1>
-
+    <nav className="flex items-center justify-between bg-slate-800 px-6 py-4 text-white shadow-md">
+      <h1 className="text-xl font-bold tracking-wide">Company Task Manager</h1>
       <div className="flex items-center gap-4">
-        {user && (
-          <span className="text-sm font-medium text-gray-600">
-            Welcome, {user.email} ({user.role})
-          </span>
-        )}
+        <span className="text-sm text-gray-300">{userEmail || 'student@example.com'}</span>
         <button
-          onClick={logout}
-          className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 transition"
+          onClick={onLogout}
+          className="rounded bg-red-500 px-3 py-1 text-xs font-medium text-white transition hover:bg-red-600"
         >
           Logout
         </button>
       </div>
-    </header>
+    </nav>
   )
 }
