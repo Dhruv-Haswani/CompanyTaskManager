@@ -1,28 +1,31 @@
 import { useAuth } from '../context/AuthContext'
+import { useTask } from '../context/TaskContext'
 
 export default function Navbar() {
-  // Access global context state directly via custom hook
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuth() // <-- Pull logout directly from AuthContext
+  const { tasks } = useTask()
+
+  const pendingCount = tasks.filter((t) => !t.completed).length
 
   return (
-    <header className="flex items-center justify-between bg-white px-6 py-4 shadow-sm border-b border-gray-100">
-      <h1 className="text-xl font-bold text-gray-800">
-        Company Task Manager
-      </h1>
-
-      <div className="flex items-center gap-4">
-        {user && (
-          <span className="text-sm font-medium text-gray-600">
-            Welcome, {user.email} ({user.role})
-          </span>
-        )}
+    <nav className="flex items-center justify-between bg-slate-800 px-6 py-4 text-white shadow-md">
+      <div className="flex items-center space-x-3">
+        <h1 className="text-xl font-bold">Company Task Manager</h1>
+        <span className="rounded-full bg-blue-600 px-2.5 py-0.5 text-xs font-semibold">
+          {pendingCount} Pending
+        </span>
+      </div>
+      <div className="flex items-center space-x-4 text-sm">
+        <span className="text-gray-300">
+          Welcome, <strong className="text-white">{user?.email}</strong>
+        </span>
         <button
           onClick={logout}
-          className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 transition"
+          className="rounded bg-red-600 px-3 py-1.5 text-xs font-medium transition hover:bg-red-700"
         >
           Logout
         </button>
       </div>
-    </header>
+    </nav>
   )
 }

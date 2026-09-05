@@ -1,89 +1,52 @@
 import { useState, useEffect } from 'react'
+import { useTask } from '../context/TaskContext'
 import Navbar from '../components/Navbar'
 import TaskForm from '../components/TaskForm'
 import TaskList from '../components/TaskList'
-import { useLocalStorage } from '../hooks/useLocalStorage'
 
 export default function Dashboard() {
-  const [tasks, setTasks] = useLocalStorage('task_manager_tasks', [
-    { id: 1, text: 'Complete FSD practical' },
-    { id: 2, text: 'Revise React Hooks' }
-  ])
-  const [message, setMessage] = useState('')
-  const [timeLeft, setTimeLeft] = useState(0)
-  const [isProcessing, setIsProcessing] = useState(false)
+  const { tasks, notification, isProcessing } = useTask()
+  const [filter, setFilter] = useState('All')
 
-  // 1. Sync browser tab title on task list change
   useEffect(() => {
     document.title = `Tasks (${tasks.length}) - Company Task Manager`
   }, [tasks])
 
-  // 2. Notification countdown: 1-second tick interval for 4-second auto-dismissal
-  useEffect(() => {
-    if (!message) return
-
-    if (timeLeft <= 0) {
-      setMessage('')
-      return
-    }
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1)
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [message, timeLeft])
-
-  const triggerNotification = (text) => {
-    setMessage(text)
-    setTimeLeft(2) // 4-second notification auto-dismissal
-  }
-
-  // Add Task with 4-second (4000ms) execution delay
-  const handleAddTask = (text) => {
-    setIsProcessing(true)
-    setTimeout(() => {
-      setTasks((prevTasks) => [...prevTasks, { id: Date.now(), text }])
-      setIsProcessing(false)
-      triggerNotification('Task added successfully!')
-    }, 2000)
-  }
-
-  // Delete Task with 4-second (4000ms) execution delay
-  const handleDeleteTask = (id) => {
-    setIsProcessing(true)
-    setTimeout(() => {
-      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id))
-      setIsProcessing(false)
-      triggerNotification('Task deleted successfully!')
-    }, 2000)
-  }
-
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Navbar />
-      <main className="mx-auto max-w-4xl p-6">
-        <h2 className="text-2xl font-bold text-gray-800">My Tasks</h2>
+    <div className="min-h-screen bg-slate-900 text-white">
+      <Navbar /> {/* <-- Clean tag without props */}
 
-        {/* 4-second action processing banner */}
-        {isProcessing && (
-          <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700 animate-pulse">
-            Processing task update...
-          </div>
-        )}
-
-        {/* 4-second dynamic notification banner */}
-        {message && !isProcessing && (
-          <div className="mt-4 flex items-center justify-between rounded-lg border border-green-300 bg-green-100 px-4 py-3 text-sm font-medium text-green-800 shadow-sm transition-all duration-300">
-            <span>{message}</span>
-            <span className="rounded bg-green-200 px-2.5 py-1 text-xs font-semibold text-green-900">
-              Dismissing in {timeLeft}s
+      <main className="mx-auto max-w-4xl px-4 py-8">
+        {notification && (
+          <div className="mb-4 flex items-center justify-between rounded-lg bg-emerald-600/90 px-4 py-3 text-sm font-medium text-white shadow">
+            <span>{notification.text}</span>
+            <span className="rounded bg-emerald-800 px-2 py-0.5 text-xs">
+              Dismissing in {notification.countdown}s
             </span>
           </div>
         )}
 
-        <TaskForm onAddTask={handleAddTask} />
-        <TaskList tasks={tasks} onDeleteTask={handleDeleteTask} />
+        {isProcessing && (
+          <div className="mb-4 animate-pulse rounded-lg border border-blue-500/30 bg-blue-600/30 p-3 text-center text-sm font-medium text-blue-300">
+            Processing backend request...
+          </div>
+        )}
+
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-2xl font-bold">My Tasks</h2>
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="All">All Tasks</option>
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+
+        <TaskForm />
+        <TaskList filter={filter} />
       </main>
     </div>
   )

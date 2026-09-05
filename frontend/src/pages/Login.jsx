@@ -10,13 +10,12 @@ export default function Login() {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    // 1. Password length restriction validation
-    if (password.length < 6) {
+    // Minimum 6-character password rule for Exp 2
+    if (!password || password.length < 6) {
       setError('Password must be at least 6 characters long.')
       return
     }
 
-    // Clear error and proceed with login
     setError('')
     login(email.trim() || 'student@example.com')
   }
@@ -24,36 +23,40 @@ export default function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-xl bg-white p-8 shadow-md">
-        <h1 className="mb-6 text-2xl font-bold text-gray-800">Login</h1>
+        <h1 className="mb-6 text-2xl font-bold text-gray-800">Company Task Login</h1>
 
-        {/* Validation Error Alert */}
         {error && (
           <div className="mb-4 rounded-lg border border-red-300 bg-red-100 px-3 py-2 text-sm font-medium text-red-700">
             {error}
           </div>
         )}
 
-        <input
-          type="email"
-          placeholder="Email (e.g., student@example.com)"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mb-3 w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="mb-4">
+          <label className="mb-1 block text-sm font-medium text-gray-600">Email Address</label>
+          <input
+            type="email"
+            placeholder="student@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
 
-        <input
-          type="password"
-          placeholder="Password (min. 6 characters)"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="mb-6">
+          <label className="mb-1 block text-sm font-medium text-gray-600">Password</label>
+          <input
+            type="password"
+            placeholder="Min. 6 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
 
-        <button
-          type="submit"
-          className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
-        >
-          Login
+        <button type="submit" className="btn-primary w-full">
+          Sign In
         </button>
       </form>
     </div>

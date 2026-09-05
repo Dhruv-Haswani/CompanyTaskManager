@@ -1,24 +1,21 @@
-import { AuthProvider, useAuth } from './context/AuthContext'
+import { useState } from 'react'
+import { useAuth } from './context/AuthContext'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 
-function NavigationHandler() {
-  const { page } = useAuth()
-
-  return (
-    <>
-      {page === 'home' && <Home />}
-      {page === 'login' && <Login />}
-      {page === 'dashboard' && <Dashboard />}
-    </>
-  )
-}
-
 export default function App() {
-  return (
-    <AuthProvider>
-      <NavigationHandler />
-    </AuthProvider>
-  )
+  const { user } = useAuth()
+  const [showLogin, setShowLogin] = useState(false)
+
+  // Automatic redirect once user context is set
+  if (user) {
+    return <Dashboard onLogout={() => setShowLogin(false)} />
+  }
+
+  if (showLogin) {
+    return <Login />
+  }
+
+  return <Home onLogin={() => setShowLogin(true)} />
 }

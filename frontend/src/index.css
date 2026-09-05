@@ -1,1 +1,12 @@
 @import "tailwindcss";
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn-primary {
+    @apply rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 active:scale-95;
+  }
+  .card-container {
+    @apply rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md;
+  }
+}

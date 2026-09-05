@@ -1,17 +1,17 @@
-import { useAuth } from '../context/AuthContext'
-
-export default function Home() {
-  const { setPage } = useAuth()
-
+export default function Home({ onLogin }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100">
-      <h1 className="text-4xl font-bold text-gray-800">Company Task Manager</h1>
-      <p className="mt-4 text-gray-600">Manage Your Tasks Effectively</p>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-900 px-4 text-center text-white">
+      <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
+        Company Task Manager
+      </h1>
+      <p className="mt-4 max-w-lg text-gray-300">
+        Organize, monitor, and streamline team workflows effortlessly.
+      </p>
       <button
-        onClick={() => setPage('login')}
-        className="mt-6 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700 transition"
+        onClick={onLogin}
+        className="mt-8 rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 active:scale-95"
       >
-        Login
+        Go to Login
       </button>
     </div>
   )
