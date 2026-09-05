@@ -1,43 +1,49 @@
-export default function TaskList({ tasks, onDeleteTask, onToggleTask, onViewTask }) {
-  if (tasks.length === 0) {
-    return <p className="text-center text-gray-500">No tasks available.</p>
+import { useTask } from '../context/TaskContext'
+
+export default function TaskList({ filter }) {
+  const { tasks, deleteTask, toggleTask, isProcessing } = useTask()
+
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === 'Pending') return !task.completed
+    if (filter === 'Completed') return task.completed
+    return true
+  })
+
+  if (filteredTasks.length === 0) {
+    return <p className="py-4 text-center text-gray-400">No tasks found.</p>
   }
 
   return (
-    <ul className="space-y-3">
-      {tasks.map((task) => (
-        <li
+    <div className="space-y-3">
+      {filteredTasks.map((task) => (
+        <div
           key={task.id}
-          className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+          className="flex items-center justify-between rounded-lg bg-slate-800 p-4 shadow transition hover:bg-slate-750"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center space-x-3">
             <input
               type="checkbox"
-              checked={task.completed || false}
-              onChange={() => onToggleTask(task.id)}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              checked={task.completed}
+              onChange={() => toggleTask(task.id)}
+              className="h-5 w-5 rounded border-gray-600 bg-slate-700 text-blue-600 focus:ring-blue-500"
             />
-            <span className={`text-gray-700 ${task.completed ? 'line-through text-gray-400' : ''}`}>
+            <span
+              className={`text-base ${
+                task.completed ? 'text-gray-500 line-through' : 'text-white'
+              }`}
+            >
               {task.text}
             </span>
           </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => onViewTask(task)}
-              className="text-sm font-medium text-blue-500 hover:text-blue-700"
-            >
-              View
-            </button>
-            <button
-              onClick={() => onDeleteTask(task.id)}
-              className="text-sm font-medium text-red-500 hover:text-red-700"
-            >
-              Delete
-            </button>
-          </div>
-        </li>
+          <button
+            onClick={() => deleteTask(task.id)}
+            disabled={isProcessing}
+            className="rounded bg-red-600/80 px-3 py-1 text-xs font-medium text-white transition hover:bg-red-600 disabled:opacity-50"
+          >
+            Delete
+          </button>
+        </div>
       ))}
-    </ul>
+    </div>
   )
 }
