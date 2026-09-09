@@ -1,21 +1,24 @@
-import { useState } from 'react'
-import { useAuth } from './context/AuthContext'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
+import React from 'react';
+import { useAuth } from './context/AuthContext';
+import Navbar from './components/Navbar';
+import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
 
-export default function App() {
-  const { user } = useAuth()
-  const [showLogin, setShowLogin] = useState(false)
+const App = () => {
+  const { user } = useAuth();
 
-  // Automatic redirect once user context is set
-  if (user) {
-    return <Dashboard onLogout={() => setShowLogin(false)} />
+  // Show login screen if not authenticated
+  if (!user) {
+    return <Login />;
   }
 
-  if (showLogin) {
-    return <Login />
-  }
+  // Render main app layout when logged in
+  return (
+    <div className="min-h-screen bg-slate-900 text-slate-100">
+      <Navbar />
+      <Dashboard />
+    </div>
+  );
+};
 
-  return <Home onLogin={() => setShowLogin(true)} />
-}
+export default App;

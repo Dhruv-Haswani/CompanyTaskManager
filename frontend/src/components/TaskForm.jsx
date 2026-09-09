@@ -1,34 +1,36 @@
-import { useState } from 'react'
-import { useTask } from '../context/TaskContext'
+import React, { useState } from 'react';
+import { useTask } from '../context/TaskContext';
 
-export default function TaskForm() {
-  const [input, setInput] = useState('')
-  const { addTask, isProcessing } = useTask()
+const TaskForm = () => {
+  const [text, setText] = useState('');
+  const { addTask, isAdding } = useTask();
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    if (!input.trim() || isProcessing) return
-    addTask(input.trim())
-    setInput('')
-  }
+    e.preventDefault();
+    if (text.trim()) {
+      addTask(text.trim());
+      setText('');
+    }
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="mb-6 flex gap-3">
+    <form onSubmit={handleSubmit} className="flex gap-3 mb-6">
       <input
         type="text"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
         placeholder="Enter a new task..."
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        disabled={isProcessing}
-        className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+        className="flex-1 bg-slate-800 border border-slate-700 text-white placeholder-slate-400 rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500"
       />
       <button
         type="submit"
-        disabled={isProcessing || !input.trim()}
-        className="rounded-lg bg-blue-600 px-5 py-2 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+        disabled={isAdding}
+        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium px-5 py-2.5 rounded-lg transition-colors"
       >
-        {isProcessing ? 'Adding...' : 'Add Task'}
+        {isAdding ? 'Adding...' : 'Add Task'}
       </button>
     </form>
-  )
-}
+  );
+};
+
+export default TaskForm;
