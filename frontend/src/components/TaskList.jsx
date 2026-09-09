@@ -1,49 +1,41 @@
-import { useTask } from '../context/TaskContext'
+import React, { useState } from 'react';
+import { useTask } from '../context/TaskContext';
+import TaskCard from './TaskCard';
 
-export default function TaskList({ filter }) {
-  const { tasks, deleteTask, toggleTask, isProcessing } = useTask()
+const TaskList = () => {
+  const { tasks } = useTask();
+  const [filter, setFilter] = useState('All');
 
   const filteredTasks = tasks.filter((task) => {
-    if (filter === 'Pending') return !task.completed
-    if (filter === 'Completed') return task.completed
-    return true
-  })
-
-  if (filteredTasks.length === 0) {
-    return <p className="py-4 text-center text-gray-400">No tasks found.</p>
-  }
+    if (filter === 'Pending') return task.status === 'Pending';
+    if (filter === 'Completed') return task.status === 'Completed';
+    return true; // 'All'
+  });
 
   return (
-    <div className="space-y-3">
-      {filteredTasks.map((task) => (
-        <div
-          key={task.id}
-          className="flex items-center justify-between rounded-lg bg-slate-800 p-4 shadow transition hover:bg-slate-750"
+    <div className="w-full mt-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-white">My Tasks</h2>
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="bg-slate-800 text-white border border-slate-700 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-blue-500 cursor-pointer"
         >
-          <div className="flex items-center space-x-3">
-            <input
-              type="checkbox"
-              checked={task.completed}
-              onChange={() => toggleTask(task.id)}
-              className="h-5 w-5 rounded border-gray-600 bg-slate-700 text-blue-600 focus:ring-blue-500"
-            />
-            <span
-              className={`text-base ${
-                task.completed ? 'text-gray-500 line-through' : 'text-white'
-              }`}
-            >
-              {task.text}
-            </span>
-          </div>
-          <button
-            onClick={() => deleteTask(task.id)}
-            disabled={isProcessing}
-            className="rounded bg-red-600/80 px-3 py-1 text-xs font-medium text-white transition hover:bg-red-600 disabled:opacity-50"
-          >
-            Delete
-          </button>
+          <option value="All">All Tasks</option>
+          <option value="Pending">Pending</option>
+          <option value="Completed">Completed</option>
+        </select>
+      </div>
+
+      {filteredTasks.length === 0 ? (
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-8 text-center text-slate-400">
+          No tasks found under "{filter}".
         </div>
-      ))}
+      ) : (
+        filteredTasks.map((task) => <TaskCard key={task.id} task={task} />)
+      )}
     </div>
-  )
-}
+  );
+};
+
+export default TaskList;
