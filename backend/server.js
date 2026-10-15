@@ -24,7 +24,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 
 app.get('/', (req, res) => {
-  res.send('JWT Authentication API is running');
+  res.send('Backend is running inside Docker!');
+});
+
+app.get('/api', (req, res) => {
+  res.send('Backend is running inside Docker!');
 });
 
 const PORT = process.env.PORT || 5001;

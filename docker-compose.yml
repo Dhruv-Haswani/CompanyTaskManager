@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: backend-container
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - MONGO_URI=mongodb+srv://2024dhruvhaswani_db_user:baTcrlqaCqeBmzbE@cluster1.yxyvb6z.mongodb.net/CompanyDB?retryWrites=true&w=majority
+      - JWT_SECRET=supersecretkey12345
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend-container
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:5001
+    stdin_open: true
+    tty: true
