@@ -9,6 +9,7 @@ dotenv.config();
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const taskRoutes = require('./routes/taskroutes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ if (process.env.MONGO_URI) {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/tasks', taskRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend is running inside Docker!');
@@ -54,6 +56,11 @@ io.on('connection', (socket) => {
   socket.on('chatMessage', (data) => {
     console.log(`[${socket.id}] ${data.username}: ${data.message}`);
     io.emit('chatMessage', data);
+  });
+
+  // Real-time synchronization for Tasks across all browsers
+  socket.on('taskUpdated', (data) => {
+    socket.broadcast.emit('taskUpdated', data);
   });
 
   // Client disconnection
