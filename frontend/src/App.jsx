@@ -117,7 +117,7 @@ export default function App() {
                 : 'bg-slate-800 text-gray-300 hover:bg-slate-700'
             }`}
           >
-            💬 Exp 8 (Live Chat)
+            💬 Live Chat
           </button>
         </nav>
       </header>
