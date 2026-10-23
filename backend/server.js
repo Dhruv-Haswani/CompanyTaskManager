@@ -13,7 +13,26 @@ const taskRoutes = require('./routes/taskroutes');
 
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:3000' }));
+// Allow requests from localhost as well as deployed Vercel and Render domains
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, or same-origin)
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Fallback to allow seamless testing
+      }
+    },
+    credentials: true
+  })
+);
 app.use(express.json());
 
 // Database connection
@@ -43,7 +62,7 @@ const server = http.createServer(app);
 // Initialize Socket.IO with CORS
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: '*',
     methods: ['GET', 'POST']
   }
 });

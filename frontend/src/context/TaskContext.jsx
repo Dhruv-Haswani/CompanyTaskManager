@@ -4,6 +4,8 @@ import { io } from 'socket.io-client'
 const TaskContext = createContext(null)
 
 export function TaskProvider({ children }) {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
   const [tasks, setTasks] = useState(() => {
     try {
       const savedTasks = localStorage.getItem('company_tasks')
@@ -20,7 +22,7 @@ export function TaskProvider({ children }) {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const res = await fetch('http://localhost:5001/api/tasks')
+        const res = await fetch(`${API_URL}/api/tasks`)
         if (res.ok) {
           const data = await res.json()
           if (Array.isArray(data) && data.length > 0) {
@@ -40,11 +42,11 @@ export function TaskProvider({ children }) {
       }
     }
     fetchTasks()
-  }, [])
+  }, [API_URL])
 
   // 2. Real-time WebSocket connection for cross-browser live synchronization
   useEffect(() => {
-    const socket = io('http://localhost:5001', {
+    const socket = io(API_URL, {
       transports: ['websocket', 'polling'],
     })
     socketRef.current = socket
@@ -59,7 +61,7 @@ export function TaskProvider({ children }) {
     return () => {
       socket.disconnect()
     }
-  }, [])
+  }, [API_URL])
 
   // 3. Sync changes across browser tabs via storage events
   useEffect(() => {
@@ -104,7 +106,7 @@ export function TaskProvider({ children }) {
 
     // Persist to MongoDB backend in background
     try {
-      fetch('http://localhost:5001/api/tasks', {
+      fetch(`${API_URL}/api/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: title.trim(), status: 'Pending' }),
@@ -124,7 +126,7 @@ export function TaskProvider({ children }) {
     const target = updated.find((t) => t.id === id)
     if (target) {
       try {
-        fetch(`http://localhost:5001/api/tasks/${id}`, {
+        fetch(`${API_URL}/api/tasks/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: target.completed ? 'Completed' : 'Pending' }),
@@ -142,7 +144,7 @@ export function TaskProvider({ children }) {
     showNotification('Task deleted!')
 
     try {
-      fetch(`http://localhost:5001/api/tasks/${id}`, {
+      fetch(`${API_URL}/api/tasks/${id}`, {
         method: 'DELETE',
       }).catch(() => {})
     } catch {

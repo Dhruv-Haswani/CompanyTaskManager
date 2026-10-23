@@ -22,17 +22,20 @@ export default function App() {
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
 
+  // Dynamic API URL for local & cloud (Vercel/Render)
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
   // Exp 7 backend fetch
   useEffect(() => {
-    fetch('http://localhost:5001')
+    fetch(`${API_URL}/api`)
       .then((res) => res.text())
       .then((data) => setBackendResponse(data))
-      .catch(() => setBackendResponse('Backend is running inside Docker!'));
-  }, []);
+      .catch(() => setBackendResponse('Backend is running!'));
+  }, [API_URL]);
 
   // Exp 8 socket setup
   useEffect(() => {
-    const socket = io('http://localhost:5001', {
+    const socket = io(API_URL, {
       transports: ['websocket', 'polling']
     });
     socketRef.current = socket;
