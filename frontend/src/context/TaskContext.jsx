@@ -93,7 +93,6 @@ export function TaskProvider({ children }) {
     if (!title.trim()) return
 
     try {
-      // 1. Await real database creation to get the MongoDB _id
       const res = await fetch(`${API_URL}/api/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -144,7 +143,6 @@ export function TaskProvider({ children }) {
     setTasks(updated)
     notifySocketUpdate(updated)
 
-    // Sync status change directly to MongoDB Atlas
     try {
       await fetch(`${API_URL}/api/tasks/${id}`, {
         method: 'PUT',
@@ -220,3 +218,6 @@ export function useTasks() {
   }
   return context
 }
+
+// Export both useTask and useTasks for backwards compatibility
+export const useTask = useTasks;
