@@ -91,64 +91,83 @@ export function TaskProvider({ children }) {
 
   const addTask = async (title) => {
     if (!title.trim()) return
-    const newTask = {
+
+    try {
+      // 1. Await real database creation to get the MongoDB _id
+      const res = await fetch(`${API_URL}/api/tasks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title.trim(), category: 'General', status: 'Pending' }),
+      })
+
+      if (res.ok) {
+        const saved = await res.json()
+        const newTask = {
+          id: saved._id || saved.id || Date.now().toString(),
+          title: saved.title || title.trim(),
+          text: saved.title || title.trim(),
+          completed: saved.status === 'Completed',
+          createdAt: saved.createdAt || new Date().toISOString(),
+        }
+        const updated = [newTask, ...tasks]
+        setTasks(updated)
+        notifySocketUpdate(updated)
+        showNotification('Task added successfully!')
+        return
+      }
+    } catch (err) {
+      console.warn('Network error adding task, falling back to local ID:', err)
+    }
+
+    // Fallback if backend is offline
+    const fallbackTask = {
       id: Date.now().toString(),
       title: title.trim(),
       text: title.trim(),
       completed: false,
       createdAt: new Date().toISOString(),
     }
-
-    const updated = [newTask, ...tasks]
+    const updated = [fallbackTask, ...tasks]
     setTasks(updated)
     notifySocketUpdate(updated)
     showNotification('Task added successfully!')
-
-    // Persist to MongoDB backend in background
-    try {
-      fetch(`${API_URL}/api/tasks`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: title.trim(), status: 'Pending' }),
-      }).catch(() => {})
-    } catch {
-      // background sync
-    }
   }
 
-  const toggleTask = (id) => {
+  const toggleTask = async (id) => {
+    const target = tasks.find((t) => t.id === id)
+    if (!target) return
+
+    const newCompleted = !target.completed
     const updated = tasks.map((task) =>
-      task.id === id ? { ...task, completed: !task.completed } : task
+      task.id === id ? { ...task, completed: newCompleted } : task
     )
     setTasks(updated)
     notifySocketUpdate(updated)
 
-    const target = updated.find((t) => t.id === id)
-    if (target) {
-      try {
-        fetch(`${API_URL}/api/tasks/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: target.completed ? 'Completed' : 'Pending' }),
-        }).catch(() => {})
-      } catch {
-        // background sync
-      }
+    // Sync status change directly to MongoDB Atlas
+    try {
+      await fetch(`${API_URL}/api/tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newCompleted ? 'Completed' : 'Pending' }),
+      })
+    } catch (err) {
+      console.warn('Failed to update task status in backend:', err)
     }
   }
 
-  const deleteTask = (id) => {
+  const deleteTask = async (id) => {
     const updated = tasks.filter((task) => task.id !== id)
     setTasks(updated)
     notifySocketUpdate(updated)
     showNotification('Task deleted!')
 
     try {
-      fetch(`${API_URL}/api/tasks/${id}`, {
+      await fetch(`${API_URL}/api/tasks/${id}`, {
         method: 'DELETE',
-      }).catch(() => {})
-    } catch {
-      // background sync
+      })
+    } catch (err) {
+      console.warn('Failed to delete task from backend:', err)
     }
   }
 
@@ -158,17 +177,24 @@ export function TaskProvider({ children }) {
 
   useEffect(() => {
     if (!notification) return
-    const timer = setInterval(() => {
+
+    const interval = setInterval(() => {
       setNotification((prev) => {
-        if (!prev || prev.countdown <= 1) {
-          clearInterval(timer)
-          return null
-        }
+        if (!prev) return null
+        if (prev.countdown <= 1) return null
         return { ...prev, countdown: prev.countdown - 1 }
       })
     }, 1000)
-    return () => clearInterval(timer)
+
+    return () => clearInterval(interval)
   }, [notification])
+
+  const clearCompleted = () => {
+    const updated = tasks.filter((t) => !t.completed)
+    setTasks(updated)
+    notifySocketUpdate(updated)
+    showNotification('Completed tasks cleared!')
+  }
 
   return (
     <TaskContext.Provider
@@ -177,9 +203,9 @@ export function TaskProvider({ children }) {
         addTask,
         toggleTask,
         deleteTask,
+        clearCompleted,
         notification,
         isProcessing,
-        setIsProcessing,
       }}
     >
       {children}
@@ -187,10 +213,10 @@ export function TaskProvider({ children }) {
   )
 }
 
-export const useTask = () => {
+export function useTasks() {
   const context = useContext(TaskContext)
   if (!context) {
-    throw new Error('useTask must be used within a TaskProvider')
+    throw new Error('useTasks must be used within a TaskProvider')
   }
   return context
 }
